@@ -79,9 +79,10 @@ def download( myname ):
                 else:
                     log.debug( 'Предыдущий прайс не старый, копироавать не надо.' )
                 # Убрать скачанные файлы
-                if  os.path.exists(DnewPrice):  os.remove(DnewPrice)   
-            
-            
+                if  os.path.exists(DnewPrice):  
+                    os.remove(DnewPrice)
+#                    os.rename(FnewName, 'new_brullov.xlsx')
+                        
         elif len(new_files) == 0 :        
             log.debug( 'Не удалось скачать файл прайса ')
         else:

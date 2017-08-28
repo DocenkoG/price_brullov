@@ -8,7 +8,7 @@ import sys
 import configparser
 import time
 import openpyxl                       # Для .xlsx
-# import xlrd                             # для .xls
+# import xlrd                         # для .xls
 
 
 def make_loger():
@@ -76,6 +76,14 @@ def convert2csv( myname ):
             print( 'backgroundColor1=', ccc.fill.start_color)
             print( 'backgroundColor2=', ccc.fill.end_color)
             print( 'Строка', i, 'столбец', colGrp, 'значение', ccc.value)
+            bold= True
+bold= False / True
+italic= False / True
+size= 10.0
+background= solid / None
+font= Calibri
+italic= False
+
             continue
             '''
 
@@ -87,13 +95,13 @@ def convert2csv( myname ):
 #            elif SubGrpFontSize == ccc.font.size :                  # Подгруппа
 #                subGrpName = quoted(sh.cell(row=i,column=colSGrp).value)
     
-            if HeaderFontSize == ccc.font.size :                            # Заголовок таблицы
+            if True == ccc.font.bold :                               # Заголовок таблицы
+                print('ddd')
                 pass
-    
-            elif (None == sh.cell(row=i, column=in_columns_j['закупка']).value) :    # Пустая строка
+            elif (None == sh.cell(row=i, column=in_columns_j['цена1']).value) :    # Пустая строка
+                print('xxxx')
                 pass
-                print( 'Пустая строка:', sh.cell(row=i, column=in_columns_j['закупка']).value )
-    
+                print( 'Пустая строка:', sh.cell(row=i, column=in_columns_j['цена1']).value )
             elif RegularFontSize == ccc.font.size :                 # Информационная строка
                 ccc = sh.cell(row=i, column=out_columns_j['код'])
                 code = ccc.value
@@ -105,7 +113,7 @@ def convert2csv( myname ):
                         ccc = sh.cell(row=i, column=j)
                         cellType  = ccc.data_type
                         cellValue = ccc.value
-#                       print (cellType, cellValue)
+#                        print (cellType, cellValue)
                         if cellValue == None : 
                             ss = ''
                         elif cellType in ('n') :                            # numeric
@@ -121,11 +129,27 @@ def convert2csv( myname ):
                             ss = ''
                     else : 
                         # вычисляемое поле
-                        s1 = sh.cell(row=i, column=in_columns_j['бренд']).value
-                        s2 = sh.cell(row=i, column=in_columns_j['код']).value
-                        s3 = sh.cell(row=i, column=in_columns_j['примечание']).value
-                        ss = quoted(s1 + ' ' + s2 + ' ' + s3)
-                        pass
+                        if strname == 'закупка' :
+                            ccc = sh.cell(row=i, column=in_columns_j['цена1'])
+                            cellType  = ccc.data_type
+                            cellValue = ccc.value
+#                            print (cellType, cellValue)
+                            if cellValue == None : 
+                                ss = '0'
+                            elif cellType in ('n') :                            # numeric
+                                cost = 0.75*cellValue
+                                if int(cost) == cost:
+                                    ss = str(int(cost))
+                                else :
+                                    ss = str(cost)
+                            else :
+                                ss = '00'
+                        else:
+                            #s1 = sh.cell(row=i, column=in_columns_j['wtyf1']).value
+                            #s2 = sh.cell(row=i, column=in_columns_j['код']).value
+                            #s3 = sh.cell(row=i, column=in_columns_j['цена1']).value
+                            #ss = quoted(s1 + ' ' + s2 + ' ' + s3)
+                            pass
                     sss.append(ss)
     
 #               sss.append(grpName)

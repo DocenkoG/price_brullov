@@ -36,6 +36,7 @@ def main( ):
     log.info('------------  '+myname +'  ------------')
 
     if  brullov_downloader.download( myname ) :
+        os.system( myname + '_converter_xlsx.xlsm')
         brullov_converter.convert2csv( myname )
         shutil.copy2( myname + '.csv', 'c://AV_PROM/prices/' + myname +'/'+ myname + '.csv')
         shutil.copy2( 'python.log',    'c://AV_PROM/prices/' + myname +'/python.log')
