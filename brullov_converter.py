@@ -137,7 +137,10 @@ italic= False
                             if cellValue == None : 
                                 ss = '0'
                             elif cellType in ('n') :                            # numeric
-                                cost = 0.75*cellValue
+                                if ('epiphan' == sh.cell(row=i, column=in_columns_j['бренд']).value.lower()) and cellValue>10000:
+                                    cost = 0.7*cellValue
+                                else:
+                                    cost = 0.75*cellValue
                                 if int(cost) == cost:
                                     ss = str(int(cost))
                                 else :
