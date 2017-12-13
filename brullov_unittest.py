@@ -85,7 +85,7 @@ class Abn(unittest.TestCase):
         driver.find_element_by_name("Login").click()
         time.sleep(4)     
         driver.get(self.base_url + "private/remains/?download=Y")
-        time.sleep(10)     
+        time.sleep(25)     
         
 
     def is_element_present(self, how, what):
