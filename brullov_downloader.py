@@ -55,7 +55,6 @@ def download( myname ):
                     new_ext  = os.path.splitext(new_file)[-1]
                     DnewFile = os.path.join( os.getcwd(),new_file)
                     new_file_date = os.path.getmtime(DnewFile)
-                    print(new)
                     log.debug( 'Файл из архива ' +DnewFile + ' имеет дату ' + str(datetime.fromtimestamp(new_file_date) ) )
                     DnewPrice = DnewFile
                 elif len(new_files) >1 :
