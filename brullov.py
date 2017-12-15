@@ -276,8 +276,6 @@ def download( dealerName ):
 
 
 def is_file_expiry(priceName, cfgFName):
-    cfgFName  = ('cfg_'+dealerName+'.cfg').lower()
-    priceName = ('new_'+dealerName+'.xls').lower()
     basicNamelist, basic = config_read( cfgFName, 'basic' )
     qty_days = basic['срок годности']
     p = qty_days.find(' ')
@@ -314,10 +312,11 @@ def main( dealerName):
     cfgFName   = ('cfg_'+dealerName+'.cfg').lower()
     priceName  = ('new_'+dealerName+'.xls').lower()
     
-    fileName, result = download(dealerName)
+    #fileName, result = download(dealerName)
+    fileName, result = 'new_brullov.xlsb',True
     if result:
         if  is_file_expiry( fileName, cfgFName):
-            os.system( myname + '_converter_xlsx.xlsm')
+            os.system( dealerName + '_converter_xlsx.xlsm')
             convert2csv( dealerName, csvFName)
     if os.path.exists( csvFName    ) : shutil.copy2( csvFName ,    'c://AV_PROM/prices/' + dealerName +'/'+csvFName )
     if os.path.exists( 'python.log') : shutil.copy2( 'python.log', 'c://AV_PROM/prices/' + dealerName +'/python.log')
