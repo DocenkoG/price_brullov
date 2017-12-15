@@ -7,7 +7,7 @@ import sys
 import configparser
 import time
 import shutil
-#import openpyxl                     # Для .xlsx
+import openpyxl                      # Для .xlsx
 import xlrd                          # для .xls
 from   price_tools import getCellXlsx, getCell, quoted, dump_cell, currencyType, subInParentheses
 import csv
@@ -36,7 +36,7 @@ def getXlsxString(sh, i, in_columns_j):
     impValues = {}
     for item in in_columns_j.keys() :
         j = in_columns_j[item]
-        if item in ('закупка','продажа','цена') :
+        if item in ('закупка','продажа','цена','цена1') :
             if getCellXlsx(row=i, col=j, isDigit='N', sheet=sh).find('Звоните') >=0 :
                 impValues[item] = '0.1'
             else :
@@ -50,31 +50,34 @@ def getXlsxString(sh, i, in_columns_j):
 
 
 
-def convert2csv( dealerName, csvFName ):
-    cfgFName   = ('cfg_'+dealerName+'.cfg').lower()
-    fileNameIn = ('new_'+dealerName+'.xls').lower()
+def convert2csv( fileNameIn, cfgFName ):
+    basicNamelist, basic = config_read( cfgFName, 'basic' )
+    csvFName  = basic['filename_out']
+    sheetName = basic['sheetname']
     
-#   book = openpyxl.load_workbook(filename = fileNameIn, read_only=False, keep_vba=False, data_only=False)  # xlsx
-#   sheet = book.worksheets[0]                                                                              # xlsx
-#   log.info('-------------------  '+sheet.title +'  ----------')                                           # xlsx
-#   sheetNames = book.get_sheet_names()                                                                     # xlsx
+    log.debug('Reading price ' + fileNameIn )
+    book = openpyxl.load_workbook(filename = fileNameIn, read_only=False, keep_vba=False, data_only=False)  # xlsx
+    #sheet = book.worksheets[0]                                                                             # xlsx
+    sheet = book[sheetName]                                                                                 # xlsx 
+    log.info('-------------------  '+sheet.title +'  ----------')                                           # xlsx
+    sheetNames = book.get_sheet_names()                                                                     # xlsx
 
-    book = xlrd.open_workbook( fileNameIn.encode('cp1251'), formatting_info=True)                       # xls
-    sheet = book.sheets()[0]                                                                            # xls
-    log.info('-------------------  '+sheet.name +'  ----------')                                        # xls
+#    book = xlrd.open_workbook( fileNameIn.encode('cp1251'), formatting_info=True)                       # xls
+#    sheet = book.sheets()[0]                                                                            # xls
+#    log.info('-------------------  '+sheet.name +'  ----------')                                        # xls
 
     out_cols, out_template = config_read(cfgFName, 'cols_out')
     in_cols,  in_cols_j    = config_read(cfgFName, 'cols_in')
-    brands,   discount     = config_read(cfgFName, 'discount')
+    #brands,   discount     = config_read(cfgFName, 'discount')
     for k in in_cols_j.keys():
         p = in_cols_j[k].find(' ')
         if p>0 :
-            in_cols_j[k] = int(in_cols_j[k][ :p]) -1
+            in_cols_j[k] = int(in_cols_j[k][ :p])                                   # -1              # xls
         else:
-            in_cols_j[k] = int(in_cols_j[k]     ) -1
-    for k in discount.keys():
-        discount[k] = (100 - int(discount[k]))/100
-    print(discount)
+            in_cols_j[k] = int(in_cols_j[k]     )                                   # -1              # xls
+    #for k in discount.keys():
+    #    discount[k] = (100 - int(discount[k]))/100
+    #print(discount)
 
     outFile = open( csvFName, 'w', newline='', encoding='CP1251', errors='replace')
     csvWriter = csv.DictWriter(outFile, fieldnames=out_cols )
@@ -119,65 +122,37 @@ def convert2csv( dealerName, csvFName ):
     brand_koeft = 1
     recOut  ={}
 
-    for i in range(1, sheet.nrows) :                                    # xls
-#   for i in range(1, sheet.max_row +1) :                               # xlsx
+#   for i in range(1, sheet.nrows) :                                    # xls
+    for i in range(1, sheet.max_row +1) :                               # xlsx
         i_last = i
         try:
             #print('i =',i,)
+            '''                                                         # xls 
             xfx = sheet.cell_xf_index(i, 0)
             xf  = book.xf_list[xfx]
             level = xf.alignment.indent_level
             bgci  = xf.background.pattern_colour_index
             ccc   = sheet.cell(i, 0)
-            value = ccc.value
-            if value == None or value == '' :                           # Пустая строка
+            value = ccc.value   
+            '''
+            impValues = getXlsxString(sheet, i, in_cols_j)
+                
+            if impValues['код'] == '' :                                # Пустая строка
                 print (i, 'Пусто!!!')
                 continue
-            elif bgci == 64 and level > 0 :                             # Обычная строка
-                impValues = getXlsString(sheet, i, in_cols_j)
-                impValues['бренд']     = brand
-                impValues['группа_']   = grp
-                impValues['подгруппа'] = subgrp
-                impValues['артикул']   = impValues['артикул'].replace('ZZZ','').rstrip()
-                
+            else :                                                     # Обычная строка
                 for outColName in out_template.keys() :
-                    shablon = out_template[outColName]
-                    for key in impValues.keys():
-                        if shablon.find(key) >= 0 :
-                            shablon = shablon.replace(key, impValues[key])
-                    if (outColName == 'закупка') and (brand_koeft != 1) :
-                        shablon = str( float(impValues['цена_']) * brand_koeft )
-                        #print('уценка. ', impValues['цена со скидкой'], shablon)
+                    if (outColName == 'закупка') and (impValues['бренд'].lower() == 'epiphan') and ( float( impValues['цена1']) >10000 ) :
+                        shablon = str( float(impValues['цена1']) * 0.7  )
+                    elif (outColName == 'закупка') :
+                        shablon = str( float(impValues['цена1']) * 0.75 )
+                    else:
+                        shablon = out_template[outColName]
+                        for key in impValues.keys():
+                            if shablon.find(key) >= 0 :
+                                shablon = shablon.replace(key, impValues[key])
                     recOut[outColName] = shablon
                 csvWriter.writerow(recOut)
-            elif bgci == 28 and level == 2 :                            # Бренд
-                p = value.rstrip().rfind(' ')
-                if p>0 :
-                    brand = value[p+1:].rstrip()
-                    try:
-                        brand_koeft = discount[brand.lower()]
-                    except Exception as e:
-#                        log.error('Exception: <' + str(e) + '> Ошибка назначения скидки в файле конфигурации' )
-                        brand_koeft = 1
-                else:
-                    brand = ''
-                    brand_koeft = 1
-                print('brand=',brand)
-                subgrp = ''
-                grp = value[:p]
-            elif bgci == 28 and level == 4:                             # Группа
-                grp    = value
-                subgrp = ''
-                #print('группа=',grp)
-            elif bgci == 29 :                                           # Подгруппа
-                subgrp = value
-                #print('подгруппа=',subgrp)
-            elif value == None:                                         # Пустая строка
-                print( 'None' )
-                pass
-
-            else :                                                      # нераспознана строка
-                log.info('Не распознана строка ' + str(i) + '<' + ccc.value + '> level='+str(level)+' bgci='+str(bgci) )
 
         except Exception as e:
             print(e)
@@ -310,14 +285,14 @@ def main( dealerName):
     log.info('         '+dealerName )
     csvFName   = ('csv_'+dealerName+'.csv').lower()
     cfgFName   = ('cfg_'+dealerName+'.cfg').lower()
-    priceName  = ('new_'+dealerName+'.xls').lower()
+    priceName  = ('new_'+dealerName+'.xlsx').lower()
     
     #fileName, result = download(dealerName)
     fileName, result = 'new_brullov.xlsb',True
     if result:
-        if  is_file_expiry( fileName, cfgFName):
-            os.system( dealerName + '_converter_xlsx.xlsm')
-            convert2csv( dealerName, csvFName)
+        if  True:#is_file_expiry( fileName, cfgFName):
+            #os.system( dealerName + '_converter_xlsx.xlsm')
+            convert2csv( priceName, cfgFName)
     if os.path.exists( csvFName    ) : shutil.copy2( csvFName ,    'c://AV_PROM/prices/' + dealerName +'/'+csvFName )
     if os.path.exists( 'python.log') : shutil.copy2( 'python.log', 'c://AV_PROM/prices/' + dealerName +'/python.log')
     if os.path.exists( 'python.1'  ) : shutil.copy2( 'python.log', 'c://AV_PROM/prices/' + dealerName +'/python.1'  )
