@@ -137,7 +137,7 @@ def convert2csv( fileNameIn, cfgFName ):
             '''
             impValues = getXlsxString(sheet, i, in_cols_j)
                 
-            if impValues['код'] == '' :                                # Пустая строка
+            if impValues['код'] == '' or impValues['код'] == 'Арт.' :  # Пустая строка
                 print (i, 'Пусто!!!')
                 continue
             else :                                                     # Обычная строка
@@ -231,7 +231,7 @@ def download( dealerName ):
                 FoldName = 'old_' + dealerName + new_ext                         # Старая копия прайса, для сравнения даты
                 FnewName = 'new_' + dealerName + new_ext                         # Предыдущий прайс, с которым работает макрос
                 if  (not os.path.exists( FnewName)) or new_file_date > os.path.getmtime(FnewName) : 
-                    log.debug( 'Предыдущего прайса нет или файл поставщика не старый. Копируем его.' )
+                    log.debug( 'Предыдущего прайса нет или скачанный файл новее. Копируем его.' )
                     if os.path.exists( FoldName): os.remove( FoldName)
                     if os.path.exists( FnewName): os.rename( FnewName, FoldName)
                     shutil.copy2(DnewPrice, FnewName)
@@ -245,8 +245,7 @@ def download( dealerName ):
             log.debug( 'Не удалось скачать файл прайса ')
         else:
             log.debug( 'Скачалось несколько файлов. Надо разбираться ...')
-
-    return DnewFile,retCode
+    return FnewName,retCode
 
 
 
@@ -287,11 +286,11 @@ def main( dealerName):
     cfgFName   = ('cfg_'+dealerName+'.cfg').lower()
     priceName  = ('new_'+dealerName+'.xlsx').lower()
     
-    #fileName, result = download(dealerName)
-    fileName, result = 'new_brullov.xlsb',True
+    fileName, result = download(dealerName)
+    #fileName, result = 'new_brullov.xlsb',True
     if result:
-        if  True:#is_file_expiry( fileName, cfgFName):
-            #os.system( dealerName + '_converter_xlsx.xlsm')
+        if  is_file_expiry( fileName, cfgFName):
+            os.system( dealerName + '_converter_xlsx.xlsm')
             convert2csv( priceName, cfgFName)
     if os.path.exists( csvFName    ) : shutil.copy2( csvFName ,    'c://AV_PROM/prices/' + dealerName +'/'+csvFName )
     if os.path.exists( 'python.log') : shutil.copy2( 'python.log', 'c://AV_PROM/prices/' + dealerName +'/python.log')
