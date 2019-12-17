@@ -155,17 +155,17 @@ def download( cfg ):
     retCode     = False
     filename_new= cfg.get('download','filename_new')
     filename_old= cfg.get('download','filename_old')
-    login       = cfg.get('download','login'    )
-    password    = cfg.get('download','password' )
+    #login       = cfg.get('download','login'    )
+    #password    = cfg.get('download','password' )
     url_lk      = cfg.get('download','url_lk'   )
     url_file    = cfg.get('download','url_file' )
     
     try:
         s = requests.Session()
-        r = s.get(url_lk, auth=(login,password))  # ,headers = headers (И без него сработало, но где-то может понадобиться)
+        # r = s.get(url_lk, auth=(login,password))  # ,headers = headers (И без него сработало, но где-то может понадобиться)
         # page = lxml.html.fromstring(r.text)
         # data = {'USER_LOGIN':login, 'USER_PASSWORD':password})
-        log.debug('Авторизация на %s   --- code=%d', url_lk, r.status_code)
+        # log.debug('Авторизация на %s   --- code=%d', url_lk, r.status_code)
         r = s.get(url_file)
         log.debug('Загрузка файла %24d bytes   --- code=%d', len(r.content), r.status_code)
         retCode = True
