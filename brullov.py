@@ -52,7 +52,7 @@ def getXlsxString(sh, i, in_columns_j):
 
 
 def convert_excel2csv(cfg):
-    csvFName  = cfg.get('basic','filename_out')
+#    csvFName  = cfg.get('basic','filename_out')
     priceFName= cfg.get('basic','filename_in')
     sheetName = cfg.get('basic','sheetname')
     
@@ -75,9 +75,28 @@ def convert_excel2csv(cfg):
     #    discount[k] = (100 - int(discount[k]))/100
     #print(discount)
 
-    outFile = open( csvFName, 'w', newline='', encoding='CP1251', errors='replace')
-    csvWriter = csv.DictWriter(outFile, fieldnames=out_cols )
-    csvWriter.writeheader()
+#    outFile = open( csvFName, 'w', newline='', encoding='CP1251', errors='replace')
+#    csvWriter = csv.DictWriter(outFile, fieldnames=out_cols )
+#    csvWriter.writeheader()
+
+    outFileUSD = False
+    outFileEUR = False
+    outFileRUR = False
+    if cfg.has_option('basic','filename_out_RUR'):
+        csvFfileNameRUR = cfg.get('basic', 'filename_out_RUR')
+        outFileRUR = open(csvFfileNameRUR, 'w', newline='')
+        csvWriterRUR = csv.DictWriter(outFileRUR, fieldnames=cfg.options('cols_out'))
+        csvWriterRUR.writeheader()
+    if cfg.has_option('basic', 'filename_out_USD'):
+        csvFfileNameUSD = cfg.get('basic', 'filename_out_USD')
+        outFileUSD = open(csvFfileNameUSD, 'w', newline='')
+        csvWriterUSD = csv.DictWriter(outFileUSD, fieldnames=cfg.options('cols_out'))
+        csvWriterUSD.writeheader()
+    if cfg.has_option('basic', 'filename_out_EUR'):
+        csvFfileNameEUR = cfg.get('basic', 'filename_out_EUR')
+        outFileEUR = open(csvFfileNameEUR, 'w', newline='')
+        csvWriterEUR = csv.DictWriter(outFileEUR, fieldnames=cfg.options('cols_out'))
+        csvWriterEUR.writeheader()
 
     '''                                     # Блок проверки свойств для распознавания групп      XLSX                                  
     for i in range(2393, 2397):                                                         
@@ -138,6 +157,14 @@ def convert_excel2csv(cfg):
                                 shablon = shablon.replace(key, impValues[key])
                     recOut[outColName] = shablon
                 csvWriter.writerow(recOut)
+            if recOut['валюта'] == 'RUR':
+                csvWriterRUR.writerow(recOut)
+            elif recOut['валюта'] == 'USD':
+                csvWriterUSD.writerow(recOut)
+            elif recOut['валюта'] == 'EUR':
+                csvWriterEUR.writerow(recOut)
+            else:
+                log.error('нераспознана валюта "%s" для товара "%s"', recOut['валюта'], recOut['код производителя'])
 
         except Exception as e:
             print(e)
@@ -147,7 +174,12 @@ def convert_excel2csv(cfg):
                 log.debug('Exception: <' + str(e) + '> при обработке строки ' + str(i) +'.' )
 
     log.info('Обработано ' +str(i_last)+ ' строк.')
-    outFile.close()
+    if outFileRUR:
+        outFileRUR.close()
+    if outFileUSD:
+        outFileUSD.close()
+    if outFileEUR:
+        outFileEUR.close()
 
 
 
@@ -223,8 +255,8 @@ def make_loger():
 def processing(cfgFName):
     log.info('----------------------- Processing '+cfgFName )
     cfg = config_read(cfgFName)
-    filename_out = cfg.get('basic','filename_out')
-    filename_in  = cfg.get('basic','filename_in')
+#    filename_out = cfg.get('basic','filename_out')
+#    filename_in  = cfg.get('basic','filename_in')
     filename_new = cfg.get('download','filename_new')
     
     if cfg.has_section('download'):
