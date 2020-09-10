@@ -156,12 +156,11 @@ def convert_excel2csv(cfg):
                             if shablon.find(key) >= 0 :
                                 shablon = shablon.replace(key, impValues[key])
                     recOut[outColName] = shablon
-                csvWriter.writerow(recOut)
-            if recOut['валюта'] == 'RUR':
+            if recOut['валюта'] == 'руб.':
                 csvWriterRUR.writerow(recOut)
             elif recOut['валюта'] == 'USD':
                 csvWriterUSD.writerow(recOut)
-            elif recOut['валюта'] == 'EUR':
+            elif recOut['валюта'] == 'EU':
                 csvWriterEUR.writerow(recOut)
             else:
                 log.error('нераспознана валюта "%s" для товара "%s"', recOut['валюта'], recOut['код производителя'])
